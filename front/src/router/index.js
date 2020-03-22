@@ -7,6 +7,7 @@ import safety from "../components/safety";
 import photo from "../components/subassembly/photo";
 import upload from "../components/subassembly/upload";
 import  error  from  '../components/404'
+import userinfo from "../components/subassembly/userinfo";
 Vue.use(Router)
 
 export default new Router({
@@ -28,6 +29,10 @@ export default new Router({
         {
           path: 'upload',
           component: upload
+        },
+        {
+          path:'userinfo',
+          component:userinfo
         }
       ]
     },

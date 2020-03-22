@@ -5,7 +5,8 @@
       <h2 class="txt" v-if="files.length===0">把要上传的文件拖动到这里</h2>
       <div class="filebox" v-for="(item,index) of files">
           <p>{{item.name}}</p>
-        <el-progress :percentage="item.uploadPercentage"></el-progress>
+        <el-progress :text-inside="true" :stroke-width="26" :percentage="item.uploadPercentage"></el-progress>
+
       </div>
     </div>
 
@@ -24,14 +25,28 @@
     },
     methods: {
       uploadFile: function (file) {
-        console.log(file)
         var item = {
           name: file.name,
-          uploadPercentage: 67   //完成的百分比
+          uploadPercentage: 0   //完成的百分比,先写一个默认值
         };
-        this.files.push(item);//稍后完成  ....
+        this.files.push(item);
         let fd=new FormData();
         fd.append('myFile', file);
+        var xhr = new XMLHttpRequest();
+        let userinfo=JSON.parse(localStorage.getItem('userinfo'))
+        let email=userinfo.email
+        let time=this.gettime()
+        console.log(time)
+        let userInfo={
+            email,
+           time
+        }
+        fd.append('usertime',JSON.stringify(userInfo))
+        xhr.open('POST', '/api/setphoto', true);
+        xhr.upload.addEventListener('progress', function (e) {
+          item.uploadPercentage = Math.round((e.loaded * 100) / e.total);
+        }, false);
+        xhr.send(fd);
       },
       onDrag: function (e) {
         e.stopPropagation();
@@ -44,6 +59,36 @@
         for (var i = 0; i !== dt.files.length; i++) {
           this.uploadFile(dt.files[i]);
         }
+      },
+      gettime:function () {
+        var date = new Date();
+        var seperator1 = "-";
+        var seperator2 = ":";
+        //以下代码依次是获取当前时间的年月日时分秒
+        var year = date.getFullYear();
+        var month = date.getMonth() + 1;
+        var strDate = date.getDate();
+        var minute = date.getMinutes();
+        var hour = date.getHours();
+        var second = date.getSeconds();
+        //固定时间格式
+        if (month >= 1 && month <= 9) {
+          month = "0" + month;
+        }
+        if (strDate >= 0 && strDate <= 9) {
+          strDate = "0" + strDate;
+        }
+        if (hour >= 0 && hour <= 9) {
+          hour = "0" + hour;
+        }
+        if (minute >= 0 && minute <= 9) {
+          minute = "0" + minute;
+        }
+        if (second >= 0 && second <= 9) {
+          second = "0" + second;
+        }
+        var currentdate = year + seperator1 + month + seperator1 + strDate;
+        return currentdate;
       }
     },
     mounted() {
@@ -84,5 +129,6 @@
     margin-top: 40px;
     margin-left: 40px;
     line-height: 30px;
+    float: left;
   }
 </style>

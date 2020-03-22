@@ -11,18 +11,22 @@
 
     </div>
     <div class="userinfo">
-      <div class="tou" style="text-align: center;line-height: 30px" @click="show">
-        <i class="el-icon-user"></i>
+      <div class="tou" style="text-align: center;line-height: 30px" @click="show" v-if="imgurl.length==0">
+        <i class="el-icon-user" ></i>
       </div>
-      <span style="font-size: 12px;text-align: center">好哥哥</span>
+      <div @click="show" v-if="!imgurl.length==0">
+        <el-image :src="imgurl"  class="tou" ></el-image>
+      </div>
+
+      <span style="font-size: 12px;text-align: center">{{username}}</span>
       <transition>
         <div class="menu" v-if="kg">
-          <li>修改信息</li>
+          <router-link to="/index/userinfo" style="color:#333"><li>修改信息</li></router-link>
+          <router-link to="/safety" style="color:#333"><li>修改密码</li></router-link>
           <li @click="tuichu">退出登录</li>
         </div>
       </transition>
     </div>
-
   </div>
 </template>
 
@@ -35,7 +39,9 @@
       return {
         water: '',
         dushu: '',
-        kg: false
+        kg: false,
+        username:'',
+        imgurl:''
       }
     },
     methods: {
@@ -74,6 +80,11 @@
       } else {
         this.city()
       }
+    },
+    created() {
+      let userinfo=JSON.parse(localStorage.getItem('userinfo'))
+      this.imgurl=`http://127.0.0.1:3000/${userinfo.imgurl.replace("\\", "/")}`;
+      this.username=userinfo.username;
     }
   }
 </script>
@@ -102,6 +113,7 @@
   }
 
   .tou {
+    display: block;
     width: 30px;
     height: 30px;
     border-radius: 50%;
@@ -113,14 +125,14 @@
 
   .menu {
     width: 150px;
-    height: 80px;
+    height: 120px;
     position: absolute;
     right: 0;
     top: 50px;
     border: 1px solid #dcdcdc;
   }
 
-  .menu > li {
+  .menu  li {
     height: 40px;
     width: 100%;
     border-top: 1px solid #dcdcdc;
@@ -130,7 +142,7 @@
     cursor: pointer;
   }
 
-  .menu > li:hover {
+  .menu  li:hover {
     background: #007DFF;
     color: #fff;
   }

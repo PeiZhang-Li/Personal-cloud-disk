@@ -5,7 +5,8 @@ let bodyParser = require('body-parser');
 let jwt = require('jsonwebtoken');
 let mongodb = require('./mongo');
 let sendemail=require('./sendemail');
-let axios=require('axios')
+app.use('/upload', express.static('upload'));
+let multiparty=require('multiparty')
 app.use(bodyParser.urlencoded({extended: false}));
 app.post('/login', (req, res) => {
     //登录接口
@@ -21,7 +22,7 @@ app.post('/login', (req, res) => {
             let obj={
                 'username':resq[0].username||'',
                  'email':resq[0].email||'',
-                  'imgurl':resq[0].toxiang||''
+                  'imgurl':resq[0].touxiang||''
             }
             res.send({'userinfo':obj,'token':token})
         }
@@ -82,6 +83,66 @@ if(yzcode==useryzcode){
 }else{
     res.send('-1')
 }
+})
+app.post('/setuserinfo',(req,res)=>{
+    //设置用户头像
+    let form = new multiparty.Form();
+    form.uploadDir = "upload/userinfo"; //设置文件上传的目录
+    form.parse(req,(err, fields, files)=>{
+        if(files){
+            //有文件上传走这里
+            let filepath = files.file[0].path;//文件地址
+            let filesize = files.file[0].size;//文件大小
+            let userinfo=JSON.parse(fields.userinfo[0])
+            let email=userinfo.email;
+            let username=userinfo.username;
+            mongodb.cha('user','root',{'email':email}).then(resq=>{
+               if(resq[0].touxiang){
+                   fs.unlink(resq[0].touxiang,()=>{
+                       mongodb.xiu('user','root',{'email':email},{'username':username})
+                       mongodb.xiu('user','root',{'email':email},{'touxiang':filepath})
+                       res.send('1')
+                   })
+               }else{
+                   mongodb.xiu('user','root',{'email':email},{'username':username})
+                   mongodb.xiu('user','root',{'email':email},{'touxiang':filepath})
+                   res.send('1')
+               }
+            })
+        }else{
+            //没有文件上传
+          for(i in  req.body){
+             let email=JSON.parse(i).email;
+             let username=JSON.parse(i).username;
+              mongodb.xiu('user','root',{'email':email},{'username':username}).then(resq=>{
+                 if(resq==1){
+                     res.send('1')
+                 }else{
+                     res.send('-1')
+                 }
+              })
+          }
+        }
+    })
+});
+app.post('/setphoto',(req,res)=>{
+    let form = new multiparty.Form();
+    form.uploadDir = "upload/photo"; //设置文件上传的目录
+    form.parse(req,(err,fields, files)=>{
+        let userinfo=JSON.parse(fields.usertime)
+        let path=files.myFile[0].path;//文件地址
+        let email=userinfo.email;
+        let time=userinfo.time;
+        let obj={
+            email,
+            time,
+            path
+        }
+        mongodb.zeng('user','photo',obj,{'path':path}).then(resq=>{
+            res.end()
+        })
+    })
+
 })
 app.listen(3000, () => {
     console.log('开始执行')

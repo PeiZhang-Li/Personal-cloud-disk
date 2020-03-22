@@ -104,8 +104,16 @@
               });
             } else {
               //成功修改的回调
+              let _this=this;
               this.$alert('修改成功', '', {
-                confirmButtonText: '确定'
+                confirmButtonText: '确定',
+                callback:function () {
+                  localStorage.removeItem('weather')
+                  localStorage.removeItem('date')
+                  localStorage.removeItem('userinfo')
+                  localStorage.removeItem('token')
+                   _this.$router.go(-1)
+                }
               });
             }
           })
@@ -114,14 +122,6 @@
     },
     created() {
 
-    },
-    mounted() {
-      let height = document.documentElement.clientHeight;
-      this.$refs.boxs.style.height = height + 'px'
-      let that = this;
-      window.onresize = function () {
-        that.$refs.boxs.style.height = height + 'px'
-      }
     }
   }
 </script>
