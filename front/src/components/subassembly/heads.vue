@@ -1,33 +1,25 @@
 <template>
   <div class="headsa">
-    <div class="weathers">
-      <p v-if="water.length===0"><i class="el-icon-loading"></i>Lodging...</p>
-      <h2>{{water.date}}</h2>
-      <i class="el-icon-cloudy-and-sunny" v-if="water.weather=='多云'"></i>
-      <i class="el-icon-sunny" v-if="water.weather=='晴天'"></i>
-      <i class="el-icon-cloudy" v-if="water.weather=='阴天'"></i>
-      <span>{{water.weather}}</span>
-      <span>{{dushu}}</span>
-
-    </div>
-    <div class="userinfo">
-      <div class="tou" style="text-align: center;line-height: 30px" @click="show" v-if="imgurl.length==0">
-        <i class="el-icon-user" ></i>
-      </div>
-      <div @click="show" v-if="!imgurl.length==0">
-        <el-image :src="imgurl"  class="tou" ></el-image>
-      </div>
-
-      <span style="font-size: 12px;text-align: center">{{username}}</span>
-      <transition>
-        <div class="menu" v-if="kg">
-          <router-link to="/index/userinfo" style="color:#333"><li>修改信息</li></router-link>
-          <router-link to="/safety" style="color:#333"><li>修改密码</li></router-link>
-          <li @click="tuichu">退出登录</li>
-        </div>
-      </transition>
-    </div>
+    <el-dropdown style="float: right;margin-right: 40px;position: relative;">
+  <div class="el-dropdown-link">
+        <div class="userinfo">
+          <div class="tou" style="text-align: center;line-height: 30px" @click="show" v-if="imgurl.length==0">
+            <i class="el-icon-user" ></i>
+          </div>
+          <div  v-if="!imgurl.length==0">
+            <el-image :src="imgurl"  class="tou" ></el-image>
+          </div>
+          <p class="p1">{{username}}</p>
   </div>
+  </div>
+      <el-dropdown-menu slot="dropdown">
+        <el-dropdown-item><router-link to="/index/userinfo" style="color:#333"><li>修改信息</li></router-link></el-dropdown-item>
+        <el-dropdown-item><router-link to="/safety" style="color:#333"><li>修改密码</li></router-link></el-dropdown-item>
+        <el-dropdown-item><p @click="tuichu">退出登录</p></el-dropdown-item>
+      </el-dropdown-menu>
+    </el-dropdown>
+  </div>
+
 </template>
 
 <script>
@@ -45,45 +37,23 @@
       }
     },
     methods: {
-      city() {    //定义获取城市方法
-        const geolocation = new BMap.Geolocation();
-        var _this = this;
-        geolocation.getCurrentPosition(function getinfo(position) {
-          let city = position.address.city;            //获取城市信息
-          let province = position.address.province;     //获取省份信息
-          _this.$axios.post(`/juhe/simpleWeather/query?key=ba891642b5c1f74dcd1a570269ff780e&city=${encodeURIComponent(city.substr(0, city.indexOf('市')))}`).then(res => {
-            _this.water = res.data.result.future[0];
-            localStorage.setItem('date', JSON.stringify(res.data.result.future[0].date))
-            localStorage_Time.setAge(24 * 60 * 60 * 1000);//设置一天过期
-            localStorage_Time.set('weather', JSON.stringify(res.data.result.future[0]))
-            _this.dushu = res.data.result.future[0].temperature
-          })
-        }, function (e) {
-
-        }, {provider: 'baidu'});
-      },
       show() {
         this.kg = !this.kg;
       },
       tuichu() {
-        localStorage.removeItem('weather')
-        localStorage.removeItem('date')
+        console.log('触发')
         localStorage.removeItem('userinfo')
         localStorage.removeItem('token')
         this.$router.push('/login')
       }
     },
-    mounted() {
-      if (localStorage_Time.get('weather') && !localStorage_Time.isExpire('weather')) {
-        this.water = JSON.parse(localStorage_Time.get('weather'));
-        this.dushu = JSON.parse(localStorage_Time.get('weather')).temperature
-      } else {
-        this.city()
-      }
-    },
     created() {
       let userinfo=JSON.parse(localStorage.getItem('userinfo'))
-      this.imgurl=`http://127.0.0.1:3000/${userinfo.imgurl.replace("\\", "/")}`;
+      if(userinfo.imgurl.length==0){
+        this.imgurl==''
+      }else{
+        this.imgurl=`/api/${userinfo.imgurl.replace("\\", "/")}`;
+      }
       this.username=userinfo.username;
     }
   }
@@ -91,27 +61,15 @@
 
 <style scoped>
   .headsa {
-    height: 50px;
+    height: 55px;
     width: 100%;
     position: relative;
     border-bottom: 1px solid #dcdcdc;
   }
-
-  .weathers {
-    padding: 0 20px;
-    height: 100%;
-    float: right;
-    border-right: 1px solid #dcdcdc;
-    border-left: 1px solid #dcdcdc;
-    position: relative;
-  }
-
   .userinfo {
     padding: 0 20px;
-    float: right;
-    position: relative;
-  }
 
+  }
   .tou {
     display: block;
     width: 30px;
@@ -120,40 +78,13 @@
     border: 1px solid #dcdcdc;
     overflow: hidden;
     margin: 0 auto;
+    margin-top: 5px;
     cursor: pointer;
   }
-
-  .menu {
-    width: 150px;
-    height: 120px;
-    position: absolute;
-    right: 0;
-    top: 50px;
-    border: 1px solid #dcdcdc;
-  }
-
-  .menu  li {
-    height: 40px;
-    width: 100%;
-    border-top: 1px solid #dcdcdc;
-    list-style: none;
-    text-align: center;
-    line-height: 40px;
-    cursor: pointer;
-  }
-
-  .menu  li:hover {
-    background: #007DFF;
-    color: #fff;
-  }
-
-  .v-enter, .v-leave-to {
-    opacity: 0;
-    transform: translateY(80px);
-  }
-
-  .v-enter-active, .v-leave-active {
-
-    transition: all 0.5S ease
-  }
+.p1{
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 12px;
+  text-overflow: ellipsis;
+}
 </style>

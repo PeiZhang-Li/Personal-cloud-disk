@@ -55,7 +55,7 @@ let mongodb = {
         return new Promise(resolve => {
             MongoClient.connect(url, {useNewUrlParser: true}, (err, db) => {
                 let dbo = db.db(dbname);
-                dbo.collection(tabname).deleteOne(value,function (err) {
+                dbo.collection(tabname).removeOne(value,function (err) {
                     if(!err){
                         resolve('1')
                     }else{

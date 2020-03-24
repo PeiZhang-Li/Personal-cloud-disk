@@ -6,6 +6,7 @@ import router from './router'
 import axios from 'axios'
 import ElementUI from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
+import './assets/iconfont/iconfont.js'
 import Qs from 'qs'
 Vue.prototype.$qs=Qs;
 Vue.config.productionTip = false;

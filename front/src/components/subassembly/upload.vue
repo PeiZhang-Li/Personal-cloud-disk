@@ -1,12 +1,12 @@
 <template>
-  <div>
+  <div style="height: 100%;">
     <heads/>
     <div class="dropbox">
-      <h2 class="txt" v-if="files.length===0">把要上传的文件拖动到这里</h2>
+      <h2 class="txt" v-if="files.length===0">把要上传的文件拖动到这里(不支持文件夹类上传)</h2>
       <div class="filebox" v-for="(item,index) of files">
-          <p>{{item.name}}</p>
-        <el-progress :text-inside="true" :stroke-width="26" :percentage="item.uploadPercentage"></el-progress>
-
+          <p class="p1">{{item.name}}</p>
+        <el-progress  :percentage="item.uploadPercentage" v-if='item.uploadPercentage!=100'></el-progress>
+        <el-progress  :percentage="100" status="success" v-if='item.uploadPercentage==100'></el-progress>
       </div>
     </div>
 
@@ -36,7 +36,6 @@
         let userinfo=JSON.parse(localStorage.getItem('userinfo'))
         let email=userinfo.email
         let time=this.gettime()
-        console.log(time)
         let userInfo={
             email,
            time
@@ -111,9 +110,9 @@
 <style scoped>
   .dropbox {
     border: 2px dashed #007bff;
-    min-height: 200px;
+    height: 100%;
     text-align: center;
-    line-height: 200px;
+    line-height: 500px;
     box-sizing: border-box;
   }
 
@@ -130,5 +129,12 @@
     margin-left: 40px;
     line-height: 30px;
     float: left;
+  }
+  .p1{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    color: #333;
   }
 </style>

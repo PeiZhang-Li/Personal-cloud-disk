@@ -5,6 +5,7 @@ let bodyParser = require('body-parser');
 let jwt = require('jsonwebtoken');
 let mongodb = require('./mongo');
 let sendemail=require('./sendemail');
+let objectId = require('mongodb').ObjectID
 app.use('/upload', express.static('upload'));
 let multiparty=require('multiparty')
 app.use(bodyParser.urlencoded({extended: false}));
@@ -131,18 +132,45 @@ app.post('/setphoto',(req,res)=>{
     form.parse(req,(err,fields, files)=>{
         let userinfo=JSON.parse(fields.usertime)
         let path=files.myFile[0].path;//文件地址
+        let filename=files.myFile[0].originalFilename;
         let email=userinfo.email;
         let time=userinfo.time;
         let obj={
             email,
             time,
-            path
+            path,
+            filename
         }
         mongodb.zeng('user','photo',obj,{'path':path}).then(resq=>{
             res.end()
         })
     })
 
+})
+app.post('/getphoto',(req,res)=>{
+    for(let i in req.body){
+        let email=JSON.parse(i);
+        mongodb.cha('user','photo',email).then(resq=>{
+               if(resq=='-1'){
+                   res.send('-1')
+               }else{
+                   res.send(resq)
+               }
+        })
+    }
+
+ })
+app.post('/removephoto',(req,res)=>{
+    for(let i in req.body){
+        let data=JSON.parse(JSON.parse(i).item)
+        let _id=objectId(data._id);
+        let path='upload\\photo\\'+data.path.split('\\')[1];
+        fs.unlink(path,()=>{
+            mongodb.shan('user','photo',{_id}).then((resq)=>{
+                    res.send('1')
+            })
+        })
+    }
 })
 app.listen(3000, () => {
     console.log('开始执行')

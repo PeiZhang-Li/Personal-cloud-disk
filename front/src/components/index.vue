@@ -2,7 +2,7 @@
     <div style="height: 100%;">
         <el-col :span="4" style="height: 100%;"><div class="menu">
           <router-link to="/index" exact class="menus">
-                <p><i class="el-icon-picture"></i>相册</p>
+                <p><i class="el-icon-folder"></i>文件</p>
           </router-link>
           <router-link to="/index/upload" exact class="menus">
             <p><i class="el-icon-upload2"></i>上传</p>
